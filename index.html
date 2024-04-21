@@ -1,3 +1,5 @@
+<!-- DEMO -->
+
 <!DOCTYPE html>
 <html lang="en">
 
@@ -8,8 +10,27 @@
   <title>Document</title>
   <style>
     body {
+      font-family: system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, 'Open Sans', 'Helvetica Neue', sans-serif;
       margin: 0;
       --indifference-class-gap: 1.3rem;
+      --v-indifference-class-gap: 1.3rem;
+    }
+
+    header {
+      max-width: 50rem;
+      margin: 0 auto;
+      text-align: center;
+    }
+
+    main {
+      max-width: 30rem;
+      margin: 0 auto;
+    }
+
+    h2 {
+      text-align: center;
+      margin-top: 2rem;
+      margin-bottom: 0;
     }
 
     .weak-order {
@@ -53,24 +74,99 @@
     .item.dragging {
       background-color: antiquewhite;
     }
+
+    .v-weak-order {
+      background-color: #ddd;
+      padding: 1rem;
+      padding-top: 0;
+      margin-top: 1rem;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+    }
+
+    .v-indifference-class {
+      display: flex;
+      flex-direction: row;
+      margin-top: calc(var(--v-indifference-class-gap) / 2);
+      margin-bottom: calc(-1 * var(--v-indifference-class-gap) / 2);
+      transition: margin 70ms ease-in-out; /* for animation */
+    }
+
+    .v-indifference-class:has(.v-item) {
+      margin-top: var(--v-indifference-class-gap);
+      margin-bottom: 0;
+    }
+
+    .v-item {
+      user-select: none;
+      width: 3rem;
+      height: 3rem;
+      line-height: 3rem;
+      text-align: center;
+      background-color: white;
+      box-sizing: border-box;
+      border: 1px solid black;
+      margin-left: -1px; /* to prevent double border */
+      cursor: move;
+    }
+
+    .v-item:first-child {
+      margin-left: 0;
+    }
+
+    .v-item.v-dragging {
+      background-color: antiquewhite;
+    }
   </style>
 </head>
 
 <body>
-  <div class="weak-order">
-    <div class="indifference-class">
-      <div class="item" draggable="true">1</div>
-      <div class="item" draggable="true">2</div>
+
+  <header>
+    <h1>Javascript Drag and Drop Weak Order: Demo</h1>
+    <p>
+      JavaScript implementation of a drag and drop UI for weak orders (rankings with ties), based on the HTML5 drag and drop API. 
+    </p>
+    <p>
+      <a href="https://github.com/DominikPeters/drag-drop-weak-orders">Code on GitHub</a>
+    </p>
+  </header>
+
+  <main>
+    <h2>Horizontal Version</h2>
+    <div class="weak-order">
+      <div class="indifference-class">
+        <div class="item" draggable="true">1</div>
+        <div class="item" draggable="true">2</div>
+      </div>
+      <div class="indifference-class">
+        <div class="item" draggable="true">3</div>
+        <div class="item" draggable="true">4</div>
+      </div>
+      <div class="indifference-class">
+        <div class="item" draggable="true">5</div>
+        <div class="item" draggable="true">6</div>
+      </div>
     </div>
-    <div class="indifference-class">
-      <div class="item" draggable="true">3</div>
-      <div class="item" draggable="true">4</div>
+
+    <h2>Vertical Version</h2>
+    <div class="v-weak-order">
+      <div class="v-indifference-class">
+        <div class="v-item" draggable="true">1</div>
+        <div class="v-item" draggable="true">2</div>
+      </div>
+      <div class="v-indifference-class">
+        <div class="v-item" draggable="true">3</div>
+        <div class="v-item" draggable="true">4</div>
+      </div>
+      <div class="v-indifference-class">
+        <div class="v-item" draggable="true">5</div>
+        <div class="v-item" draggable="true">6</div>
+      </div>
     </div>
-    <div class="indifference-class">
-      <div class="item" draggable="true">5</div>
-      <div class="item" draggable="true">6</div>
-    </div>
-  </div>
+  </main>
+
   <script>
     const items = document.querySelectorAll('.item');
     const weakOrders = document.querySelectorAll('.weak-order');
@@ -179,6 +275,125 @@
 
     function getItemAtX(indifferenceClass, x) {
       const items = [...indifferenceClass.querySelectorAll('.item:not(.dragging)')];
+
+      let nextItem = items.find(item => {
+        return x <= item.offsetLeft + item.offsetWidth / 2;
+      });
+
+      return nextItem;
+    }
+
+
+
+
+
+    const Vitems = document.querySelectorAll('.v-item');
+    const VweakOrders = document.querySelectorAll('.v-weak-order');
+
+    function VcreateEmptyIndifferenceClass() {
+      const emptyIndifferenceClass = document.createElement('div');
+      emptyIndifferenceClass.classList.add('v-indifference-class');
+      return emptyIndifferenceClass;
+    }
+
+    function VremoveEmptyIndifferenceClasses(weakOrder) {
+      const emptyIndifferenceClasses = [...weakOrder.querySelectorAll('.v-indifference-class')].filter(indifferenceClass => {
+        return indifferenceClass.children.length === 0;
+      });
+
+      emptyIndifferenceClasses.forEach(emptyIndifferenceClass => {
+        emptyIndifferenceClass.remove();
+      });
+    }
+
+    Vitems.forEach(item => {
+      item.addEventListener('dragstart', (e) => {
+        item.classList.add('v-dragging');
+        item.dataset.justStartedDragging = true;
+        e.dataTransfer.setData('text/plain', item.textContent); // safari needs this
+        e.dataTransfer.effectAllowed = "move"; // cursor
+      })
+
+      item.addEventListener('dragend', () => {
+        const weakOrder = document.querySelector('.v-weak-order:has(.v-dragging)');
+        VremoveEmptyIndifferenceClasses(weakOrder);
+        item.classList.remove('v-dragging');
+      })
+    })
+
+    VweakOrders.forEach(weakOrder => {
+      weakOrder.addEventListener('dragover', e => {
+        e.preventDefault()
+
+        const item = document.querySelector('.v-dragging');
+
+        const indifferenceClasses = [...weakOrder.querySelectorAll('.v-indifference-class')];
+
+        // target indifference class
+        const indifferenceClass = VgetIndifferenceClassAtY(weakOrder, e.clientY);
+
+        // is it currently empty, so that the item will create a "new" indifference class?
+        const indifferenceClassEmpty = indifferenceClass.children.length === 0;
+
+        // optimization: store information for later
+        // if the indifference class hasn't changed, we don't need to update empty indifference classes later
+        // exception: when we just started dragging, we need to draw initial new empty indifference classes
+        const stayedInSameIndifferenceClass = indifferenceClass == item.parentElement;
+        const justStartedDragging = item.dataset.justStartedDragging;
+        item.dataset.justStartedDragging = "";
+
+        // place item
+        const afterElement = VgetItemAtX(indifferenceClass, e.clientX);
+        const shouldAnimate = !stayedInSameIndifferenceClass && !indifferenceClassEmpty;
+        const animationOptions = {duration: 70, easing: 'ease-in-out'}
+        if (afterElement == null) {
+          if (shouldAnimate) {
+            item.animate([{ marginTop: 'var(--v-indifference-class-gap)' }, { marginTop: '0' }], animationOptions);
+          }
+          indifferenceClass.appendChild(item);
+        } else {
+          if (shouldAnimate) {
+            item.animate([{ marginBottom: 'var(--v-indifference-class-gap)' }, { marginBottom: '0' }], animationOptions);
+          }
+          indifferenceClass.insertBefore(item, afterElement);
+        }
+
+        // skip unnecessary updates
+        if (stayedInSameIndifferenceClass && !justStartedDragging) {
+          return;
+        }
+
+        // delete empty indifference classes
+        VremoveEmptyIndifferenceClasses(weakOrder);
+
+        // make empty indifference classes
+        if (indifferenceClass.children.length >= 2) {
+          // left
+          const leftEmptyIndifferenceClass = VcreateEmptyIndifferenceClass();
+          weakOrder.insertBefore(leftEmptyIndifferenceClass, indifferenceClass);
+          // right
+          const rightEmptyIndifferenceClass = VcreateEmptyIndifferenceClass();
+          weakOrder.insertBefore(rightEmptyIndifferenceClass, indifferenceClass.nextElementSibling);
+        }
+      })
+    })
+
+    function VgetIndifferenceClassAtY(weakOrder, y) {
+      const classes = [...weakOrder.querySelectorAll('.v-indifference-class')];
+
+      let nextClass = classes.find(elem => {
+        return y <= elem.offsetTop + elem.offsetHeight;
+      });
+
+      if (!nextClass) {
+        nextClass = classes[classes.length - 1];
+      }
+
+      return nextClass;
+    }
+
+    function VgetItemAtX(indifferenceClass, x) {
+      const items = [...indifferenceClass.querySelectorAll('.v-item:not(.v-dragging)')];
 
       let nextItem = items.find(item => {
         return x <= item.offsetLeft + item.offsetWidth / 2;
