@@ -172,7 +172,7 @@
       const classes = [...weakOrder.querySelectorAll('.indifference-class')];
 
       let nextClass = classes.find(elem => {
-        return x <= elem.offsetLeft + elem.offsetWidth;
+        return x <= elem.getBoundingClientRect().left + elem.getBoundingClientRect().width;
       });
 
       if (!nextClass) {
@@ -186,7 +186,7 @@
       const items = [...indifferenceClass.querySelectorAll('.item:not(.dragging)')];
 
       let nextItem = items.find(item => {
-        return x <= item.offsetLeft + item.offsetWidth / 2;
+        return x <= item.getBoundingClientRect().left + item.getBoundingClientRect().width / 2;
       });
 
       return nextItem;
