@@ -204,9 +204,15 @@
 
     weakOrders.forEach(weakOrder => {
       weakOrder.addEventListener('dragover', e => {
+        
+        const item = document.querySelector('.dragging');
+
+        // check if item can be dropped here (originates from the same weak order)
+        if (!item.parentElement || !item.parentElement.parentElement || item.parentElement.parentElement !== weakOrder) {
+          return;
+        }
         e.preventDefault()
 
-        const item = document.querySelector('.dragging');
 
         const indifferenceClasses = [...weakOrder.querySelectorAll('.indifference-class')];
 
@@ -323,9 +329,14 @@
 
     VweakOrders.forEach(weakOrder => {
       weakOrder.addEventListener('dragover', e => {
-        e.preventDefault()
 
         const item = document.querySelector('.v-dragging');
+
+        // check if item can be dropped here (originates from the same weak order)
+        if (!item.parentElement || !item.parentElement.parentElement || item.parentElement.parentElement !== weakOrder) {
+          return;
+        }
+        e.preventDefault()
 
         const indifferenceClasses = [...weakOrder.querySelectorAll('.v-indifference-class')];
 
